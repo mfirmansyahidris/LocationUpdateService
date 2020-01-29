@@ -1,3 +1,20 @@
 <resources>
     <string name="app_name">NewLocationUpdateService</string>
+
+    <!--Permission-->
+    <string name="msg_reqpermissionTitle">Dibutuhkan Permisi</string>
+    <string name="msg_reqpermissionActionSetting">Ke Pengaturan</string>
+    <string name="msg_reqpermissionActionCancel">Batalkan</string>
+    <string name="msg_reqpermissionLocation">Aplikasi Membutuhkan Layanan Lokasi Untuk Memvalidasi Laporan</string>
+    <string name="msg_reqpermissionForegorund">Aplikasi Membutuhkan Permisi untuk mengaktifkan Layanan</string>
+    <string name="msg_permissionError">Kesalahan dalam Permisi</string>
+
+    <string name="launch_activity">Launch activity</string>
+    <string name="location_unknown">Location unknown</string>
+    <string name="location_updates_label">Location Updates</string>
+
+    <string name="request_location_updates">Request location updates</string>
+    <string name="remove_location_updates">Remove location updates</string>
+
+    <string name="location_updated">Location Updated: %1$s</string>
 </resources>
