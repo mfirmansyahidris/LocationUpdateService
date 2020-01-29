@@ -10,13 +10,10 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.telkomsel.newlocationupdateservice.BuildConfig
 import com.telkomsel.newlocationupdateservice.R
 import com.telkomsel.newlocationupdateservice.screen.MainActivity
 import com.telkomsel.newlocationupdateservice.utils.Utils
-import okhttp3.internal.Util
 
 /**
  ****************************************
@@ -27,9 +24,8 @@ created by -fi-
  ****************************************
  */
 
-class LocationUpdateService: Service() {
+class LocationUpdateService : Service() {
     private val tag = LocationUpdateService::class.java.simpleName
-    private lateinit var mFusedLocationUpdate: FusedLocationProviderClient
     private lateinit var mLocationCallBack: LocationCallback
     private lateinit var mLocation: Location
 
@@ -92,11 +88,12 @@ class LocationUpdateService: Service() {
 
 
         //android O requires a Notification Channel
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.app_name)
 
             //create the channel for the notification
-            val mChannel = NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_DEFAULT)
+            val mChannel =
+                NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_DEFAULT)
 
             //set the notification channel for the notification manager
             mNotificationManager.createNotificationChannel(mChannel)
@@ -109,7 +106,7 @@ class LocationUpdateService: Service() {
         val startedFromNotification = intent?.getBooleanExtra(extraStartFromNotification, false)
 
         //we got here because the user decided to remove location updates from the notification
-        if(startedFromNotification!!){
+        if (startedFromNotification!!) {
             removeLocationUpdate()
             stopSelf()
         }
@@ -159,7 +156,7 @@ class LocationUpdateService: Service() {
         * do nothing. Otherwise, we make this service a foreground service.
         * */
 
-        if(!mChangingConfiguration && Utils().requestingLocationUpdates(this)){
+        if (!mChangingConfiguration && Utils().requestingLocationUpdates(this)) {
             Log.i(tag, "starting foreground service")
             startForeground(notificationId, getNotification())
         }
@@ -175,19 +172,23 @@ class LocationUpdateService: Service() {
     * Makes a request for location updates. Note that in this sample we merely log the
     * {@link SecurityException}.
     * */
-    fun requestLocationUpdates(){
+    fun requestLocationUpdates() {
         Log.i(tag, "requesting location updates")
         Utils().setRequestingLocationUpdates(this, true)
         startService(Intent(applicationContext, LocationUpdateService::class.java))
         try {
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallBack, Looper.myLooper())
-        }catch (unlikely: SecurityException){
+            mFusedLocationClient.requestLocationUpdates(
+                mLocationRequest,
+                mLocationCallBack,
+                Looper.myLooper()
+            )
+        } catch (unlikely: SecurityException) {
             Utils().setRequestingLocationUpdates(this, false)
             Log.e(tag, "lost location permission. could not request location updates: $unlikely")
         }
     }
 
-    private fun onNewLocation(location: Location){
+    private fun onNewLocation(location: Location) {
         Log.i(tag, "new location: $location")
 
         mLocation = location
@@ -198,7 +199,7 @@ class LocationUpdateService: Service() {
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
 
         //update notification content if running as a foreground service
-        if(serviceIsRunningInForeground(this)){
+        if (serviceIsRunningInForeground(this)) {
             mNotificationManager.notify(notificationId, getNotification())
         }
 
@@ -207,7 +208,7 @@ class LocationUpdateService: Service() {
     @Suppress("DEPRECATION")
     private fun serviceIsRunningInForeground(context: Context): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)){
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
             if (javaClass.name == service.service.className) {
                 if (service.foreground) {
                     return true
@@ -223,12 +224,22 @@ class LocationUpdateService: Service() {
         val text = Utils().getLocationText(mLocation)
         intent.putExtra(extraStartFromNotification, true)
 
-        val serviceServiceIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val activityPendingIntent = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
+        val serviceServiceIntent =
+            PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val activityPendingIntent =
+            PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
 
         val builder = NotificationCompat.Builder(this)
-            .addAction(R.drawable.ic_launch, getString(R.string.launch_activity), activityPendingIntent)
-            .addAction(R.drawable.ic_cancel, getString(R.string.remove_location_updates), serviceServiceIntent)
+            .addAction(
+                R.drawable.ic_launch,
+                getString(R.string.launch_activity),
+                activityPendingIntent
+            )
+            .addAction(
+                R.drawable.ic_cancel,
+                getString(R.string.remove_location_updates),
+                serviceServiceIntent
+            )
             .setContentText(text)
             .setContentTitle(Utils().getLocationTitle(this))
             .setOngoing(true)
@@ -237,7 +248,7 @@ class LocationUpdateService: Service() {
             .setTicker(text)
             .setWhen(System.currentTimeMillis())
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId(channelId)
         }
 
@@ -248,33 +259,33 @@ class LocationUpdateService: Service() {
     * Sets the location parameters
     * */
 
-    private fun createLocationRequest(){
+    private fun createLocationRequest() {
         mLocationRequest = LocationRequest()
         mLocationRequest.interval = updateIntervalInMilliseconds
         mLocationRequest.fastestInterval = fastestUpdateIntervalInMilliseconds
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 
-    private fun getLastLocation(){
-        try{
+    private fun getLastLocation() {
+        try {
             mFusedLocationClient.lastLocation
                 .addOnCompleteListener { task ->
-                    if(task.isSuccessful && task.result != null){
+                    if (task.isSuccessful && task.result != null) {
                         mLocation = task.result!!
                     }
                 }
-        }catch (unlikely: SecurityException){
+        } catch (unlikely: SecurityException) {
             Log.e(tag, "lost location permission: $unlikely")
         }
     }
 
-    fun removeLocationUpdate(){
+    fun removeLocationUpdate() {
         Log.i(tag, "removing location update")
-        try{
+        try {
             mFusedLocationClient.removeLocationUpdates(mLocationCallBack)
             Utils().setRequestingLocationUpdates(this, false)
             stopSelf()
-        }catch (unlikely: SecurityException){
+        } catch (unlikely: SecurityException) {
             Utils().setRequestingLocationUpdates(this, true)
             Log.e(tag, "lost location permission. could not remove location update: $unlikely")
         }
