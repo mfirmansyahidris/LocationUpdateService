@@ -17,6 +17,7 @@ created by -fi-
  */
 
 class Utils{
+    val tag = "LocationUpdate_tag"
     val keyRequestingLocationUpdates = "requestingLocationUpdate"
 
     /*

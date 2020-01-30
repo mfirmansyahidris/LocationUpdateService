@@ -4,6 +4,7 @@ import android.content.*
 import android.location.Location
 import android.os.IBinder
 import android.preference.PreferenceManager
+import android.util.Log
 import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.telkomsel.newlocationupdateservice.R
@@ -14,6 +15,7 @@ import com.telkomsel.newlocationupdateservice.utils.Utils
 import okhttp3.internal.Util
 
 class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+
     // The BroadcastReceiver used to listen from broadcasts from the service.
     private lateinit var myReceive: MyReceiver
 
@@ -46,6 +48,7 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
     }
 
     override fun mainCode() {
+        Log.d(Utils().tag, "creating activity")
         myReceive = MyReceiver()
 
         // Check that the user hasn't revoked permissions by going to Settings.
@@ -58,6 +61,9 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
 
     override fun onStart() {
         super.onStart()
+
+        Log.d(Utils().tag, "starting activity")
+
         PreferenceManager.getDefaultSharedPreferences(this)
             .registerOnSharedPreferenceChangeListener(this)
 
@@ -77,15 +83,20 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
 
     override fun onResume() {
         super.onResume()
+
+        Log.d(Utils().tag, "resuming activity")
+
         LocalBroadcastManager.getInstance(this).registerReceiver(myReceive, IntentFilter(LocationUpdateService().actionBroadcast))
     }
 
     override fun onPause() {
+        Log.d(Utils().tag, "pausing activity")
         LocalBroadcastManager.getInstance(this).unregisterReceiver(myReceive)
         super.onPause()
     }
 
     override fun onStop() {
+        Log.d(Utils().tag, "stopping activity")
         if (mBound){
             // Unbind from the service. This signals to the service that this activity is no longer
             // in the foreground, and the service can respond by promoting itself to a foreground
@@ -100,6 +111,7 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
 
     inner class MyReceiver: BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(Utils().tag, "receiving from BroadcastReceiver")
             val location = intent?.getParcelableExtra<Location>(LocationUpdateService().extraLocation)
             if(location != null){
                 Toast.makeText(this@MainActivity, Utils().getLocationText(location), Toast.LENGTH_SHORT).show()
@@ -109,6 +121,10 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        Log.i(Utils().tag, "share preference change")
         // Update the UI state depending on whether location updates are being requested.
+        if(key.equals(Utils().keyRequestingLocationUpdates)){
+            Log.i(Utils().tag, "${sharedPreferences?.getBoolean(Utils().keyRequestingLocationUpdates, false)}")
+        }
     }
 }

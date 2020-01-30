@@ -25,7 +25,6 @@ created by -fi-
  */
 
 class LocationUpdateService : Service() {
-    private val tag = LocationUpdateService::class.java.simpleName
     private lateinit var mLocationCallBack: LocationCallback
     private lateinit var mLocation: Location
 
@@ -67,6 +66,7 @@ class LocationUpdateService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.i(Utils().tag, "service created")
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -80,7 +80,7 @@ class LocationUpdateService : Service() {
         createLocationRequest()
         getLastLocation()
 
-        val handlerThread = HandlerThread(tag)
+        val handlerThread = HandlerThread(Utils().tag)
         handlerThread.start()
 
         mServiceHandler = Handler(handlerThread.looper)
@@ -101,7 +101,7 @@ class LocationUpdateService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.i(tag, "service started")
+        Log.i(Utils().tag, "service started")
 
         val startedFromNotification = intent?.getBooleanExtra(extraStartFromNotification, false)
 
@@ -127,7 +127,7 @@ class LocationUpdateService : Service() {
         * when that happens
         * */
 
-        Log.i(tag, "in onBind()")
+        Log.i(Utils().tag, "service in bind")
         stopForeground(true)
         mChangingConfiguration = false
         return mBinder
@@ -140,7 +140,7 @@ class LocationUpdateService : Service() {
         * service when that happens.
         * */
 
-        Log.i(tag, "in onRebind()")
+        Log.i(Utils().tag, "service in rebind")
         stopForeground(true)
         mChangingConfiguration = false
 
@@ -148,7 +148,7 @@ class LocationUpdateService : Service() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        Log.i(tag, "last client unbound from service")
+        Log.i(Utils().tag, "last client unbound from service")
 
         /*
         * called when the last client (MainActivity in case of this sample) unbinds from this
@@ -157,7 +157,7 @@ class LocationUpdateService : Service() {
         * */
 
         if (!mChangingConfiguration && Utils().requestingLocationUpdates(this)) {
-            Log.i(tag, "starting foreground service")
+            Log.i(Utils().tag, "starting foreground service")
             startForeground(notificationId, getNotification())
         }
 
@@ -165,6 +165,7 @@ class LocationUpdateService : Service() {
     }
 
     override fun onDestroy() {
+        Log.i(Utils().tag, "service is destroy")
         mServiceHandler.removeCallbacksAndMessages(null)
     }
 
@@ -173,7 +174,7 @@ class LocationUpdateService : Service() {
     * {@link SecurityException}.
     * */
     fun requestLocationUpdates() {
-        Log.i(tag, "requesting location updates")
+        Log.i(Utils().tag, "requesting location updates")
         Utils().setRequestingLocationUpdates(this, true)
         startService(Intent(applicationContext, LocationUpdateService::class.java))
         try {
@@ -184,12 +185,12 @@ class LocationUpdateService : Service() {
             )
         } catch (unlikely: SecurityException) {
             Utils().setRequestingLocationUpdates(this, false)
-            Log.e(tag, "lost location permission. could not request location updates: $unlikely")
+            Log.e(Utils().tag, "lost location permission. could not request location updates: $unlikely")
         }
     }
 
     private fun onNewLocation(location: Location) {
-        Log.i(tag, "new location: $location")
+        Log.i(Utils().tag, "new location: $location")
 
         mLocation = location
 
@@ -207,6 +208,8 @@ class LocationUpdateService : Service() {
 
     @Suppress("DEPRECATION")
     private fun serviceIsRunningInForeground(context: Context): Boolean {
+        Log.i(Utils().tag, "service is running in background")
+
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
             if (javaClass.name == service.service.className) {
@@ -220,6 +223,8 @@ class LocationUpdateService : Service() {
 
     @Suppress("DEPRECATION")
     private fun getNotification(): Notification {
+        Log.i(Utils().tag, "service creating notification")
+
         val intent = Intent(this, LocationUpdateService::class.java)
         val text = Utils().getLocationText(mLocation)
         intent.putExtra(extraStartFromNotification, true)
@@ -260,6 +265,7 @@ class LocationUpdateService : Service() {
     * */
 
     private fun createLocationRequest() {
+        Log.d(Utils().tag, "create location request")
         mLocationRequest = LocationRequest()
         mLocationRequest.interval = updateIntervalInMilliseconds
         mLocationRequest.fastestInterval = fastestUpdateIntervalInMilliseconds
@@ -267,6 +273,7 @@ class LocationUpdateService : Service() {
     }
 
     private fun getLastLocation() {
+        Log.d(Utils().tag, "get last location")
         try {
             mFusedLocationClient.lastLocation
                 .addOnCompleteListener { task ->
@@ -275,19 +282,19 @@ class LocationUpdateService : Service() {
                     }
                 }
         } catch (unlikely: SecurityException) {
-            Log.e(tag, "lost location permission: $unlikely")
+            Log.e(Utils().tag, "lost location permission: $unlikely")
         }
     }
 
     fun removeLocationUpdate() {
-        Log.i(tag, "removing location update")
+        Log.i(Utils().tag, "removing location update")
         try {
             mFusedLocationClient.removeLocationUpdates(mLocationCallBack)
             Utils().setRequestingLocationUpdates(this, false)
             stopSelf()
         } catch (unlikely: SecurityException) {
             Utils().setRequestingLocationUpdates(this, true)
-            Log.e(tag, "lost location permission. could not remove location update: $unlikely")
+            Log.e(Utils().tag, "lost location permission. could not remove location update: $unlikely")
         }
     }
 
