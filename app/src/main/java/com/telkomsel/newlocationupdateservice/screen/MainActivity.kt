@@ -45,7 +45,7 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
             val binder = service as LocationUpdateService.LocalBinder
             mService = binder.service
             mBound = true
-            
+
             runRequestLocation()
         }
     }
