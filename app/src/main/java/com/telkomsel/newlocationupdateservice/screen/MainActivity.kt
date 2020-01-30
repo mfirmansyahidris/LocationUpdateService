@@ -12,7 +12,6 @@ import com.telkomsel.newlocationupdateservice.base.BaseActivity
 import com.telkomsel.newlocationupdateservice.service.LocationUpdateService
 import com.telkomsel.newlocationupdateservice.utils.PermissionManager
 import com.telkomsel.newlocationupdateservice.utils.Utils
-import okhttp3.internal.Util
 
 class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -36,27 +35,24 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
     // Monitors the state of the connection to the service.
     private val mServiceConnection = object : ServiceConnection{
         override fun onServiceDisconnected(name: ComponentName?) {
+            Log.i(Utils().tag, "service is disconnected")
             mService = null
             mBound = false
         }
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            Log.i(Utils().tag, "service is connected")
             val binder = service as LocationUpdateService.LocalBinder
             mService = binder.service
             mBound = true
+            
+            runRequestLocation()
         }
     }
 
     override fun mainCode() {
         Log.d(Utils().tag, "creating activity")
         myReceive = MyReceiver()
-
-        // Check that the user hasn't revoked permissions by going to Settings.
-        if(Utils().requestingLocationUpdates(this)){
-            PermissionManager(this).requestLocationPermission {
-                mService?.requestLocationUpdates()
-            }
-        }
     }
 
     override fun onStart() {
@@ -64,21 +60,12 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
 
         Log.d(Utils().tag, "starting activity")
 
-        PreferenceManager.getDefaultSharedPreferences(this)
-            .registerOnSharedPreferenceChangeListener(this)
-
-        PermissionManager(this).requestLocationPermission {
-            if(it){
-                mService?.requestLocationUpdates()
-            }
-        }
-
-        //to remove location service
-        //mService?.removeLocationUpdate()
-
         // Bind to the service. If the service is in foreground mode, this signals to the service
         // that since this activity is in the foreground, the service can exit foreground mode.
         bindService(Intent(this, LocationUpdateService::class.java), mServiceConnection, Context.BIND_AUTO_CREATE)
+
+        //to remove location service
+        //mService?.removeLocationUpdate()
     }
 
     override fun onResume() {
@@ -125,6 +112,18 @@ class MainActivity : BaseActivity(), SharedPreferences.OnSharedPreferenceChangeL
         // Update the UI state depending on whether location updates are being requested.
         if(key.equals(Utils().keyRequestingLocationUpdates)){
             Log.i(Utils().tag, "${sharedPreferences?.getBoolean(Utils().keyRequestingLocationUpdates, false)}")
+        }
+    }
+
+    private fun runRequestLocation(){
+        PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
+            .registerOnSharedPreferenceChangeListener(this@MainActivity)
+
+        // Check that the user hasn't revoked permissions by going to Settings.
+        PermissionManager(this@MainActivity).requestLocationPermission {
+            if(it){
+                mService?.requestLocationUpdates()
+            }
         }
     }
 }
