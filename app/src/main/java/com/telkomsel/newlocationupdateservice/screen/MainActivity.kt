@@ -11,10 +11,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.telkomsel.newlocationupdateservice.R
 import com.telkomsel.newlocationupdateservice.base.BaseActivity
@@ -30,6 +27,7 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     private lateinit var mapFragment: SupportMapFragment
     private var mMap: GoogleMap? = null
     private var mK: Marker? = null
+    private var onFocus = true
 
     private lateinit var sheetBehavior: BottomSheetBehavior<View>
 
@@ -55,6 +53,10 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
         }
     }
 
+    private fun fabFocusLocation(){
+        onFocus = true
+    }
+
     override fun onLocationUpdate(location: Location) {
         addMarker(location, mMap)
     }
@@ -70,6 +72,7 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
 
     private fun addMarker(lastLocation: Location, googleMap: GoogleMap?){
         if(hasMarker){
+            if(onFocus) setCamera(mMap, lastLocation)
             animateMarker(lastLocation, mK)
         }else{
             mMap = googleMap
@@ -79,10 +82,16 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.fromBitmap(createBitmap()))
                 .anchor(0.5F, 0.5F)
             )
-            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16F))
+            animateMarker(lastLocation, mK)
+            setCamera(mMap, lastLocation)
             hasMarker = true
         }
 
+    }
+
+    private fun setCamera(p0: GoogleMap?, location: Location){
+        val cu = CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 16F)
+        p0?.animateCamera(cu)
     }
 
     @Suppress("DEPRECATION")

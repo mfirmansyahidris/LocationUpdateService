@@ -14,7 +14,7 @@
         android:layout_gravity="center" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_focus_location"
+        android:id="@+id/fab_focusLocation"
         android:layout_width="@dimen/fab_size_small"
         android:layout_height="@dimen/fab_size_small"
         app:fabCustomSize="@dimen/fab_size_small"
