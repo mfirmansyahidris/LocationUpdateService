@@ -3,4 +3,23 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <!--white level-->
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorWhite90">#F0F0F0</color>
+    <color name="colorWhite80">#eceff1</color>
+    <color name="colorWhite70">#CECECE</color>
+    <color name="colorWhite60">#8B8B8B</color>
+    <color name="colorWhite50">#6c6c6c</color>
+    <color name="colorWhite10">#292929</color>
+    <color name="colorWhite20">#505050</color>
+
+    <!--  widget  -->
+    <!--  fab  -->
+    <color name="fab_1">#00B8D4</color>
+
+    <!--Text -->
+    <color name="colorTextTitle">#3A3E44</color>
+    <color name="colorTextSubtitle">#8B8B8B</color>
+    <color name="colorTextWhite">#d6d6d6</color>
 </resources>

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.location.Location
 import android.util.Log
+import android.view.View
 import android.view.animation.LinearInterpolator
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -14,10 +15,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.telkomsel.newlocationupdateservice.R
 import com.telkomsel.newlocationupdateservice.base.BaseActivity
 import com.telkomsel.newlocationupdateservice.base.BaseActivityLocation
 import com.telkomsel.newlocationupdateservice.utils.Utils
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.bottom_sheet_info.*
 import java.lang.Exception
 import kotlin.math.abs
 import kotlin.math.sign
@@ -27,6 +31,8 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     private var mMap: GoogleMap? = null
     private var mK: Marker? = null
 
+    private lateinit var sheetBehavior: BottomSheetBehavior<View>
+
     private var hasMarker = false
 
     override fun getLayoutResource(): Int = R.layout.activity_main
@@ -34,7 +40,19 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     override fun setListener(): BaseActivityLocation = this
 
     override fun mainCode() {
+        sheetBehavior = BottomSheetBehavior.from<View>(bs_)
+
+        fab_focus_info.setOnClickListener { fabInfoAction() }
+
         mapFragment = supportFragmentManager.findFragmentById(R.id.fragment_map) as SupportMapFragment
+    }
+
+    private fun fabInfoAction() {
+        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else if (sheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
     }
 
     override fun onLocationUpdate(location: Location) {

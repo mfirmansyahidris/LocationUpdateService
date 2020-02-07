@@ -38,7 +38,7 @@ class PermissionManager(private val context: Activity) {
                     }
 
                     if (report.isAnyPermissionPermanentlyDenied) {
-                        showSettingsDialog(context.getString(R.string.msg_reqpermissionForegorund))
+                        showSettingsDialog(context.getString(R.string.msg_reqPermissionForeground))
                     }
                 }
 
@@ -84,7 +84,7 @@ class PermissionManager(private val context: Activity) {
                     }
 
                     if (report.isAnyPermissionPermanentlyDenied) {
-                        showSettingsDialog(context.getString(R.string.msg_reqpermissionLocation))
+                        showSettingsDialog(context.getString(R.string.msg_reqPermissionLocation))
                     }
                 }
 
@@ -107,13 +107,13 @@ class PermissionManager(private val context: Activity) {
 
     private fun showSettingsDialog(message: String) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(context.getString(R.string.msg_reqpermissionTitle))
+        builder.setTitle(context.getString(R.string.msg_reqPermissionTitle))
         builder.setMessage(message)
-        builder.setPositiveButton(context.getString(R.string.msg_reqpermissionActionSetting)) { dialog, _ ->
+        builder.setPositiveButton(context.getString(R.string.msg_reqPermissionActionSetting)) { dialog, _ ->
             dialog.cancel()
             openSettings()
         }
-        builder.setNegativeButton(context.getString(R.string.msg_reqpermissionActionCancel)) { dialog, _ -> dialog.cancel() }
+        builder.setNegativeButton(context.getString(R.string.msg_reqPermissionActionCancel)) { dialog, _ -> dialog.cancel() }
         builder.show()
     }
 
