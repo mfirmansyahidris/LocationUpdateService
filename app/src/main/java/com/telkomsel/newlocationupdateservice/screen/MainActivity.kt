@@ -40,7 +40,8 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     override fun mainCode() {
         sheetBehavior = BottomSheetBehavior.from<View>(bs_)
 
-        fab_focus_info.setOnClickListener { fabInfoAction() }
+        fab_info.setOnClickListener { fabInfoAction() }
+        fab_focusLocation.setOnClickListener { fabFocusLocation() }
 
         mapFragment = supportFragmentManager.findFragmentById(R.id.fragment_map) as SupportMapFragment
     }
@@ -67,6 +68,7 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     }
 
     override fun onMapReady(p0: GoogleMap?) {
+        p0?.setOnMapClickListener { onFocus = false }
         mMap = p0
     }
 
