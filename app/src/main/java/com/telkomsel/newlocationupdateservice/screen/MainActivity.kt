@@ -28,6 +28,7 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     private var mMap: GoogleMap? = null
     private var mK: Marker? = null
     private var onFocus = true
+    private var lastLocation: Location? = null
 
     private lateinit var sheetBehavior: BottomSheetBehavior<View>
 
@@ -56,10 +57,16 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
 
     private fun fabFocusLocation(){
         onFocus = true
+        lastLocation?.let {
+            setCamera(mMap, it)
+        }
     }
 
     override fun onLocationUpdate(location: Location) {
-        addMarker(location, mMap)
+        lastLocation = location
+        lastLocation?.let {
+            addMarker(it, mMap)
+        }
     }
 
     override fun onResume() {
@@ -68,8 +75,10 @@ class MainActivity : BaseActivity(), BaseActivityLocation, OnMapReadyCallback {
     }
 
     override fun onMapReady(p0: GoogleMap?) {
-        p0?.setOnMapClickListener { onFocus = false }
         mMap = p0
+        mMap?.setOnCameraMoveCanceledListener {
+            onFocus = false
+        }
     }
 
     private fun addMarker(lastLocation: Location, googleMap: GoogleMap?){
